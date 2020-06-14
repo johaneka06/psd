@@ -5,8 +5,25 @@ namespace Xyz.Game
 {
   public abstract class XyzGame : IObservable<GameResult>
   {
+    private Guid _id;
+
+    public Guid ID
+    {
+      get
+      {
+        return _id;
+      }
+    }
+
+    public XyzGame()
+    {
+      _id = Guid.NewGuid();
+    }
+
     public abstract void Move(Move move);
     public abstract string Name();
+    public abstract object GetMemento();
+    public abstract void LoadMemento(object memento);
 
     protected List<IObserver<GameResult>> _observers = new List<IObserver<GameResult>>();
     public void Attach(IObserver<GameResult> obs)
@@ -21,13 +38,26 @@ namespace Xyz.Game
         obs.Update(e);
       }
     }
+
+    public override bool Equals(object obj)
+    {
+      var game = obj as XyzGame;
+      if (game == null) return false;
+
+      return this._id == game.ID;
+    }
+
+    public override int GetHashCode()
+    {
+      return this._id.GetHashCode();
+    }
   }
 
   public abstract class Move
   {
-    protected User _player;
+    protected Guid _player;
 
-    public User Player
+    public Guid Player
     {
       get
       {
@@ -35,7 +65,7 @@ namespace Xyz.Game
       }
     }
 
-    public Move(User player)
+    public Move(Guid player)
     {
       _player = player;
     }

@@ -6,7 +6,7 @@ namespace Xyz.Game
   public class Room
   {
     private Guid _id;
-    private List<User> _users;
+    private List<Guid> _users;
     private int _max;
     private XyzGame _game;
 
@@ -18,12 +18,37 @@ namespace Xyz.Game
       }
     }
 
+    public int Max
+    {
+      get
+      {
+        return _max;
+      }
+    }
+
+    public XyzGame Game
+    {
+      set
+      {
+        _game = value;
+      }
+      get
+      {
+        return _game;
+      }
+    }
+
     public int UserCount
     {
       get
       {
         return _users.Count;
       }
+    }
+
+    public Room(Guid id, int max) : this(max)
+    {
+      this._id = id;
     }
 
     public Room(int max)
@@ -34,7 +59,7 @@ namespace Xyz.Game
       }
 
       _id = Guid.NewGuid();
-      _users = new List<User>();
+      _users = new List<Guid>();
       _max = max;
       _game = null;
     }
@@ -51,12 +76,12 @@ namespace Xyz.Game
         throw new Exception("game already started");
       }
 
-      _users.Add(u);
+      _users.Add(u.ID);
     }
 
-    public void StartGame(String game, GameConfig config = null)
+    public void StartGame(String game, GameConfig config = null, IUserRepository userRepo = null)
     {
-      _game = GameFactory.Create(game, _users, config);
+      _game = GameFactory.Create(game, _users, config, "", userRepo);
     }
 
     public void Move(Move move)
@@ -69,18 +94,20 @@ namespace Xyz.Game
       _game.Move(move);
     }
 
-
     public override bool Equals(object obj)
     {
       var room = obj as Room;
       if (room == null) return false;
 
-      return this._id == room._id;
+      return this._id == room.ID;
     }
 
     public override int GetHashCode()
     {
-      return base.GetHashCode();
+      unchecked
+      {
+        return this._id.GetHashCode();
+      }
     }
   }
 }

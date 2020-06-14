@@ -32,16 +32,16 @@ namespace Xyz.Game.Test
     [Fact]
     public void WinVertical()
     {
-      room.Move(new TicTacToeMove(amir, 4));
-      room.Move(new TicTacToeMove(budi, 3));
+      room.Move(new TicTacToeMove(amir.ID, 4));
+      room.Move(new TicTacToeMove(budi.ID, 3));
 
-      room.Move(new TicTacToeMove(amir, 7));
-      room.Move(new TicTacToeMove(budi, 0));
+      room.Move(new TicTacToeMove(amir.ID, 7));
+      room.Move(new TicTacToeMove(budi.ID, 0));
 
-      room.Move(new TicTacToeMove(amir, 1));
+      room.Move(new TicTacToeMove(amir.ID, 1));
 
-      Assert.Equal(5, amir.Exp);
-      Assert.Equal(2, budi.Exp);
+      Exception ex = Assert.Throws<Exception>(() => room.Move(new TicTacToeMove(budi.ID, 3)));
+      Assert.Equal("game already ended", ex.Message);
     }
   }
 }

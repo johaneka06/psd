@@ -3,12 +3,15 @@ using System.Collections.Generic;
 
 using Xyz.Game.ExpGainer;
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Xyz.Game
 {
   public class GameConfig
   {
-    public int WinMult;
-    public int LoseMult;
+    public int WinMult { get; set; }
+    public int LoseMult { get; set; }
 
     public static GameConfig Default()
     {
@@ -20,16 +23,20 @@ namespace Xyz.Game
       WinMult = winMult;
       LoseMult = loseMult;
     }
+
+    public GameConfig() : this(1, 1) { }
   }
 
   public class GameFactory
   {
-    public static XyzGame Create(String game, List<User> users, GameConfig config = null)
+    public static XyzGame Create(String game, List<Guid> users, GameConfig config = null, string lastState = "", IUserRepository userRepo = null)
     {
       if (config == null)
       {
         config = GameConfig.Default();
       }
+
+      XyzGame result;
 
       if (game.Equals("tic-tac-toe"))
       {
@@ -38,17 +45,29 @@ namespace Xyz.Game
           throw new Exception("tic-tac-toe must be played with 2 players");
         }
 
-        XyzGame result = new TicTacToe(users[0], users[1], 3);
-        GameResultHandler win = new WinHandler(new Multiplier(new TicTacToeWin(), config.WinMult));
-        GameResultHandler lose = new LoseHandler(new Multiplier(new TicTacToeLose(), config.LoseMult));
+        result = new TicTacToe(users[0], users[1], 3);
+        GameResultHandler win = new WinHandler(userRepo, new Multiplier(new TicTacToeWin(), config.WinMult));
+        GameResultHandler lose = new LoseHandler(userRepo, new Multiplier(new TicTacToeLose(), config.LoseMult));
 
         result.Attach(win);
         result.Attach(lose);
+      }
+      else
+      {
+        throw new Exception("game not found");
+      }
 
+      if (lastState == null || lastState == "")
+      {
         return result;
       }
 
-      throw new Exception("game not found");
+      if (game.Equals("tic-tac-toe"))
+      {
+        TicTacToeMemento memento = JsonSerializer.Deserialize<TicTacToeMemento>(lastState);
+        result.LoadMemento(memento);
+      }
+      return result;
     }
   }
 }

@@ -30,6 +30,8 @@ namespace Xyz.Game
       }
     }
 
+    public User(Guid id, string name) : this(id, name, new Exp(0)) { }
+
     public User(Guid id, string name, Exp score)
     {
       this._id = id;
@@ -57,7 +59,12 @@ namespace Xyz.Game
 
     public override int GetHashCode()
     {
-      return base.GetHashCode();
+      unchecked
+      {
+        int hash = 17;
+        hash = hash * 23 + _id.GetHashCode();
+        return hash;
+      }
     }
   }
 }
